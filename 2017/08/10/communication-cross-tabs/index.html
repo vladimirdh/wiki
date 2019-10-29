@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <meta charset="utf-8">
+    
+    <title>游览器跨tab通信 | Wiki for donghua</title>
+    
+    
+        <meta name="keywords" content="前端" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="最近整理了一下游览器同域跨tab通信的技术，写下来做个记录。 LocalStorage借助监听storage事件，可以很方便的达到效果。 1234567&#x2F;&#x2F; tab A window.addEventListener(&amp;apos;storage&amp;apos;, (event) =&amp;gt; &amp;#123;   console.log(event.key, event.oldValue, event.newValue, ev">
+<meta name="keywords" content="前端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="游览器跨tab通信">
+<meta property="og:url" content="https:&#x2F;&#x2F;vladimirdh.github.io&#x2F;wiki&#x2F;2017&#x2F;08&#x2F;10&#x2F;communication-cross-tabs&#x2F;index.html">
+<meta property="og:site_name" content="Wiki for donghua">
+<meta property="og:description" content="最近整理了一下游览器同域跨tab通信的技术，写下来做个记录。 LocalStorage借助监听storage事件，可以很方便的达到效果。 1234567&#x2F;&#x2F; tab A window.addEventListener(&amp;apos;storage&amp;apos;, (event) =&amp;gt; &amp;#123;   console.log(event.key, event.oldValue, event.newValue, ev">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:updated_time" content="2019-10-29T03:44:07.055Z">
+<meta name="twitter:card" content="summary">
+    
+
+    
+        <link rel="alternate" href="/atom.xml" title="Wiki for donghua" type="application/atom+xml" />
+    
+
+    
+        <link rel="icon" href="/wiki/favicon.ico" />
+    
+
+    <link rel="stylesheet" href="/wiki/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/wiki/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/wiki/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/wiki/css/style.css">
+    <script src="/wiki/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="/wiki/libs/jquery/plugins/cookie/1.4.1/jquery.cookie.js"></script>
+    
+    
+        <link rel="stylesheet" href="/wiki/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/wiki/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/wiki/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">Wiki for donghua</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/wiki/">首页</a>
+                
+                    <a class="main-nav-link" href="/wiki/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/wiki/categories">分类</a>
+                
+                    <a class="main-nav-link" href="/wiki/tags">标签</a>
+                
+                    <a class="main-nav-link" href="/wiki/about">关于</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/wiki/',
+        CONTENT_URL: '/wiki/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/wiki/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/wiki/">首页</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki/categories">分类</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki/tags">标签</a></td>
+                
+                    <td><a class="main-nav-link" href="/wiki/about">关于</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            
+                <aside id="sidebar">
+   
+        
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+            
+            <section id="main"><article id="post-communication-cross-tabs" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+                    <div class="article-meta">
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/wiki/tags/%E5%89%8D%E7%AB%AF/" rel="tag">前端</a>
+    </div>
+
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/wiki/2017/08/10/communication-cross-tabs/">
+            <time datetime="2017-08-10T00:00:00.000Z" itemprop="datePublished">2017-08-10</time>
+        </a>
+    </div>
+
+
+                        
+                            <i class="fa fa-bar-chart"></i>
+                            <span id="busuanzi_container_site_pv"><span id="busuanzi_value_page_pv"></span></span>    
+                        
+                        
+                            <div class="article-meta-button">
+                                <a href='https://github.com/zthxxx/Wiki-site/raw/writing/source/_posts/communication-cross-tabs.md' target="_blank" rel="noopener"> Source </a>
+                            </div>
+                            <div class="article-meta-button">
+                                <a href='https://github.com/zthxxx/Wiki-site/edit/writing/source/_posts/communication-cross-tabs.md' target="_blank" rel="noopener"> Edit </a>
+                            </div>
+                            <div class="article-meta-button">
+                                <a href='https://github.com/zthxxx/Wiki-site/commits/writing/source/_posts/communication-cross-tabs.md' target="_blank" rel="noopener"> History </a>
+                            </div>
+                        
+                    </div>
+                
+                
+    
+        <h1 class="article-title" itemprop="name">
+            游览器跨tab通信
+        </h1>
+    
+
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+        
+            
+        
+        
+            <p>最近整理了一下游览器同域跨tab通信的技术，写下来做个记录。</p>
+<h2 id="LocalStorage"><a href="#LocalStorage" class="headerlink" title="LocalStorage"></a>LocalStorage</h2><p>借助监听<code>storage</code>事件，可以很方便的达到效果。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// tab A</span></span><br><span class="line"> <span class="built_in">window</span>.addEventListener(<span class="string">'storage'</span>, (event) =&gt; &#123;</span><br><span class="line">   <span class="built_in">console</span>.log(event.key, event.oldValue, event.newValue, event.url, event.storageArea)</span><br><span class="line"> &#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// tab B</span></span><br><span class="line">localStorage.setItem(<span class="string">'name'</span>, <span class="string">'value'</span>)</span><br></pre></td></tr></table></figure>
+
+<p>优点：</p>
+<ul>
+<li><p>给同一个<code>key</code>设置同样的<code>value</code>并不会触发事件：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">localStorage.setItem(<span class="string">'num'</span>, <span class="string">'0'</span>)</span><br><span class="line">localStorage.setItem(<span class="string">'num'</span>, <span class="string">'1'</span>) <span class="comment">//触发</span></span><br><span class="line">localStorage.setItem(<span class="string">'num'</span>, <span class="string">'1'</span>) <span class="comment">//不触发</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用事件驱动，API简单，获取到的<code>event</code>数据方便使用</p>
+</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li><p>在不同的二级域名下无法触发</p>
+<p>​</p>
+</li>
+</ul>
+<p>值得一提的是，根据<a href="https://www.w3.org/TR/webstorage/#the-storage-event" target="_blank" rel="noopener">规范</a>，<code>sessionStorage</code>也会触发<code>storage</code>事件，但实际测试下来并不能触发。因为<code>sessionStorage</code>在不同的tab间是独立的，所以只能在同一tab的不同<code>iframe</code>间触发</p>
+<h2 id="Cookies"><a href="#Cookies" class="headerlink" title="Cookies"></a>Cookies</h2><p>cookies的更新并没有相关事件，只能自己进行封装。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// tab A</span></span><br><span class="line"><span class="keyword">let</span> cacheCookies = <span class="built_in">document</span>.cookie</span><br><span class="line">setInterval(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">	<span class="keyword">let</span> newCookies = <span class="built_in">document</span>.cookie</span><br><span class="line">	<span class="keyword">if</span>(newCookies === cacheCookies) <span class="keyword">return</span></span><br><span class="line">	cacheCookies = newCookies</span><br><span class="line">	<span class="built_in">console</span>.log(newCookies)</span><br><span class="line"></span><br><span class="line">&#125;, <span class="number">1000</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// tab B</span></span><br><span class="line"><span class="built_in">document</span>.cookie = <span class="string">'name=value'</span></span><br></pre></td></tr></table></figure>
+
+<p>优点：</p>
+<ul>
+<li><p>可以通过设置<code>domin</code>在不同的二级域名下触发：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">document</span>.cookie = <span class="string">'name=newValue;domin=example.com;'</span></span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li><p>cookies大小有限制 //多大限制，超出后如何</p>
+</li>
+<li><p>同域的请求会自带cookies，造成了不必要的网络传输</p>
+</li>
+<li><p>每次获取到的是纯字符，需要自己判断是否更新和解析cookies</p>
+<p>​</p>
+</li>
+</ul>
+<h2 id="IndexedDB-amp-IDBObserver"><a href="#IndexedDB-amp-IDBObserver" class="headerlink" title="IndexedDB &amp; IDBObserver"></a>IndexedDB &amp; IDBObserver</h2><p><code>IndexedDB</code>是用来在客户端储存大量数据的，通过<code>IDBObserver</code>可以监听变化。<code>IndexedDB</code>的<code>API</code>比较复杂，有着强大的功能，跨tab通信只是附带，具体的功能不做讨论。</p>
+<p>需要<code>Chrome</code>版本57以上并在<code>chrome://flags</code>打开<code>#enable-experimental-web-platform-features</code>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> dataNumber = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">var</span> db = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> observer = <span class="keyword">new</span> IDBObserver(<span class="function"><span class="params">changes</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> newData = changes.records.get(<span class="string">'data'</span>)[<span class="number">0</span>]</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'changed data:'</span>, newData.type, newData.value)</span><br><span class="line">    dataNumber = newData.value || <span class="number">0</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//初始化db</span></span><br><span class="line"><span class="keyword">var</span> openRequest = indexedDB.open(<span class="string">'demoDB'</span>);</span><br><span class="line"></span><br><span class="line">openRequest.onupgradeneeded = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    openRequest.result.createObjectStore(<span class="string">'data'</span>);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">openRequest.onsuccess = <span class="function"><span class="keyword">function</span> (<span class="params">event</span>) </span>&#123;</span><br><span class="line">    db = event.target.result;</span><br><span class="line">    <span class="keyword">var</span> transaction = db.transaction([<span class="string">'data'</span>], <span class="string">'readonly'</span>);</span><br><span class="line">  	<span class="comment">//监控db</span></span><br><span class="line">    observer.observe(db, transaction, &#123;</span><br><span class="line">        operationTypes: [<span class="string">'put'</span>, <span class="string">'clear'</span>],</span><br><span class="line">        values: <span class="literal">true</span></span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> getRequest = transaction.objectStore(<span class="string">'data'</span>).get(<span class="string">'key'</span>);</span><br><span class="line">    getRequest.onsuccess = <span class="function">(<span class="params">event</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> result = event.target.result;</span><br><span class="line">        dataNumber = result || <span class="number">0</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">`data number start from <span class="subst">$&#123;dataNumber&#125;</span>`</span>)</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//清除data</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">clearData</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!db) &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'Database connection still opening.'</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> transaction = db.transaction([<span class="string">'data'</span>], <span class="string">'readwrite'</span>);</span><br><span class="line">    <span class="keyword">var</span> request = transaction.objectStore(<span class="string">'data'</span>).clear();</span><br><span class="line">    request.onsuccess = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        transaction.oncomplete = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'clear data completed'</span>)</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//更新data</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">updateData</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!db) &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'Database connection still opening.'</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> newDataNumber = dataNumber + <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">var</span> transaction = db.transaction([<span class="string">'data'</span>], <span class="string">'readwrite'</span>);</span><br><span class="line">    <span class="keyword">var</span> request = transaction.objectStore(<span class="string">'data'</span>).put(newDataNumber, <span class="string">'key'</span>);</span><br><span class="line">    request.onsuccess = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        transaction.oncomplete = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'put data completed'</span>)</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//tab A</span></span><br><span class="line">updateData()</span><br><span class="line"></span><br><span class="line"><span class="comment">//tab B</span></span><br><span class="line">clearData()</span><br></pre></td></tr></table></figure>
+
+
+
+<p>优点：</p>
+<ul>
+<li>功能强大</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>对于通信来说过于复杂</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文简单罗列了纯客户端跨tab的技术，很显然，<code>LocalStorage</code>在多tab间通信有着明显的优势，只需要简单的封装就可使用。而<code>Cookies</code>虽然可以在不同的二级域名间通信，但也有一系列的缺点，实际使用中并不推荐。<code>IndexedDB</code>虽然功能强大，对其本意是储存数据而出现的，且对游览器的较高要求和复杂的<code>API</code>使其在跨tab通信这件事上并不是一个好的选择。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.w3.org/TR/webstorage/#the-storage-event" target="_blank" rel="noopener">https://www.w3.org/TR/webstorage/#the-storage-event</a></li>
+<li><a href="https://stackoverflow.com/questions/10260108/how-do-i-bind-event-to-sessionstorage#answer-21283114" target="_blank" rel="noopener">https://stackoverflow.com/questions/10260108/how-do-i-bind-event-to-sessionstorage#answer-21283114</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie" target="_blank" rel="noopener">https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie</a></li>
+<li><a href="https://googlechrome.github.io/samples/indexeddb-observers/" target="_blank" rel="noopener">https://googlechrome.github.io/samples/indexeddb-observers/</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB" target="_blank" rel="noopener">https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB</a></li>
+</ul>
+
+            </div>
+        
+        <footer class="article-footer">
+        </footer>
+    </div>
+</article>
+
+
+    
+
+
+
+
+    
+    
+
+
+
+
+<!-- baidu url auto push script -->
+<script type="text/javascript">
+    !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=window.location.href,o=document.referrer;if(!e.test(r)){var n="//api.share.baidu.com/s.gif";o?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var t=new Image;t.src=n}}(window);
+</script>     
+</section>
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            donghua &copy; 2019 
+            <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a>
+            <br> Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme - <a href="https://github.com/zthxxx/hexo-theme-Wikitten" target="_blank" rel="noopener">wikitten</a>
+            
+                <br>
+                <span id="busuanzi_container_site_pv"><i class="fa fa-eye"></i> <span id="busuanzi_value_site_pv"></span></span>
+                &nbsp;|&nbsp;
+                <span id="busuanzi_container_site_pv"><i class="fa fa-user"></i> <span id="busuanzi_value_site_uv"></span></span>
+            
+        </div>
+    </div>
+</footer>
+
+        
+
+    
+        <script src="/wiki/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/wiki/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/wiki/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/wiki/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/wiki/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/wiki/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/wiki/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/wiki/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/wiki/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/wiki/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+        <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true,
+            TeX: {
+                equationNumbers: {
+                  autoNumber: 'AMS'
+                }
+            }
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/wiki/js/main.js"></script>
+
+    </div>
+</body>
+</html>
